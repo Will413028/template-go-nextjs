@@ -10,6 +10,7 @@ Run from `backend/`. Needs Go (version in `go.mod`) and Docker (integration test
 make run                     # serve with backend/.env (format in .env-example)
 make test                    # go test -race through gotestsum; integration tests start PostgreSQL 18 with testcontainers
 make check                   # everything CI runs: fmt-check gen-check buf-lint lint deadcode test vuln sqlc-diff drift squawk
+make check-static            # check without the container targets (test, drift); the pre-push hook runs it
                              # migrations-immutable api-breaking tools-selftest
 make gen                     # regenerate internal/gen from ../api (Connect)
 make sqlc                    # regenerate each module's internal/store from its schema.sql and queries

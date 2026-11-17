@@ -92,8 +92,10 @@ coverage: ## Markdown coverage report from the last make test
 vuln:
 	$(GOVULNCHECK) ./...
 
-.PHONY: check
-check: fmt-check gen-check buf-lint lint deadcode test vuln sqlc-diff drift squawk migrations-immutable api-breaking tools-selftest
+# check-static is check without the targets that start containers (test, drift): the pre-push hook runs it, CI runs check.
+.PHONY: check check-static
+check: check-static test drift
+check-static: fmt-check gen-check buf-lint lint deadcode vuln sqlc-diff squawk migrations-immutable api-breaking tools-selftest
 
 # Functions that neither the binary nor any test reaches.
 .PHONY: deadcode

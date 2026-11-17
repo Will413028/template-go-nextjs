@@ -105,6 +105,7 @@ make reset-db ADMIN_ACCOUNT=<name>  # Reset DB (clear volumes + migrate + seed)
 make run                  # API server (port 8000) with backend/.env
 make test                 # Integration tests (Docker)
 make check                # Everything CI runs
+make check-static         # check without test and drift (no containers); the pre-push hook runs it
 make gen                  # Regenerate the Connect code from api/ (Protobuf)
 make sqlc                 # Regenerate query code
 ```

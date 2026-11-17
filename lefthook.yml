@@ -31,14 +31,16 @@ pre-commit:
       run: make --no-print-directory bin/golangci-lint && bin/golangci-lint run --new-from-rev=HEAD ./...
       priority: 2
 
-# CI's checks, minus the compose stack job (it builds every image): a push to main is stopped here even when CI has
-# not run yet. The security tools are local binaries (brew install actionlint zizmor gitleaks osv-scanner).
+# CI's checks, minus the compose stack job (it builds every image) and minus everything that starts containers
+# (backend integration tests, schema drift, and the backend test-count lock that reads their report): those run in CI
+# only, so a push never starts a database on a shared machine. The security tools are local binaries
+# (brew install actionlint zizmor gitleaks osv-scanner).
 pre-push:
   parallel: true
   commands:
     backend-check:
       root: backend/
-      run: make --no-print-directory check BASE="$(git rev-parse -q --verify origin/main >/dev/null && echo origin/main || echo HEAD)" && cd .. && python3 scripts/check_locks.py --go-test-report backend/test-report.json
+      run: make --no-print-directory check-static BASE="$(git rev-parse -q --verify origin/main >/dev/null && echo origin/main || echo HEAD)"
     frontend-check:
       root: frontend/
       run: pnpm audit --prod --audit-level high && pnpm gen:api:check && pnpm lint && pnpm check:deps && pnpm check:arch && pnpm test:report && pnpm build && cd .. && python3 scripts/check_built_pages.py && python3 scripts/check_locks.py --vitest-report frontend/test-report.json
