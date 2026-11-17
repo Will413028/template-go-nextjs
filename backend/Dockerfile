@@ -2,7 +2,7 @@
 # One image: `app serve` by default; the compose migrate service runs `app migrate`, which drives the bundled Atlas.
 # Base images are pinned by digest; update the tag and the digest together.
 
-FROM --platform=$BUILDPLATFORM golang:1.27.3-trixie@sha256:1896654cfc5c2b5ad74c07f29cb36f5d2d1cbed42e3054070fbfe444e521e83c AS build
+FROM --platform=$BUILDPLATFORM golang:1.27.4-trixie@sha256:f18c3d73a184fb0582828510722e723b63a93f7188d11dd223d9be6f6880e65d AS build
 ARG TARGETOS TARGETARCH
 ARG VERSION=dev
 WORKDIR /src
@@ -16,7 +16,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
 # Migrations are applied with the Atlas community build (Apache-2.0); the standard build that generates them is
 # used only on developer machines and in CI (backend/Makefile). Checksums come from release.ariga.io and match
 # ATLAS_COMMUNITY_SHA256_* in backend/Makefile, which the integration tests use.
-FROM --platform=$BUILDPLATFORM golang:1.27.3-trixie@sha256:1896654cfc5c2b5ad74c07f29cb36f5d2d1cbed42e3054070fbfe444e521e83c AS atlas
+FROM --platform=$BUILDPLATFORM golang:1.27.4-trixie@sha256:f18c3d73a184fb0582828510722e723b63a93f7188d11dd223d9be6f6880e65d AS atlas
 ARG TARGETARCH
 ARG ATLAS_VERSION=v1.3.5
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
