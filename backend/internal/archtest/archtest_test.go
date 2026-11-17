@@ -39,6 +39,19 @@ func listPackages(t *testing.T) (modulePath string, pkgs []Package) {
 
 func TestModulesFollowDependencyRules(t *testing.T) {
 	modulePath, pkgs := listPackages(t)
+	// A rule that selects nothing passes silently: require at least one package in each checked layer, as rulesFor
+	// selects them.
+	selected := map[string]bool{}
+	for _, p := range pkgs {
+		if layer, rule := rulesFor(modulePath, p.ImportPath); rule != nil {
+			selected[strings.Fields(layer)[0]] = true
+		}
+	}
+	for _, layer := range []string{"module", "platform"} {
+		if !selected[layer] {
+			t.Errorf("no %s package found: the %s rules check nothing", layer, layer)
+		}
+	}
 	for _, v := range Check(modulePath, pkgs) {
 		t.Error(v)
 	}
@@ -60,6 +73,8 @@ func TestCheckRejectsViolations(t *testing.T) {
 		{"module imports httpapi subpackage", Package{m + "aa", []string{mod + "/internal/httpapi/gen"}}, "must not depend on internal/httpapi"},
 		{"module reaches generated contract code", Package{m + "aa", []string{mod + "/internal/gen/app/items/v1"}}, "must not depend on internal/gen"},
 		{"module reaches Connect", Package{m + "aa", []string{"connectrpc.com/connect"}}, "must not depend on Connect"},
+		{"platform reaches a module", Package{mod + "/internal/platform/authctx", []string{m + "aa/store"}}, "platform must not depend on modules"},
+		{"platform reaches httpapi", Package{mod + "/internal/platform/db", []string{mod + "/internal/httpapi"}}, "platform must not depend on internal/httpapi"},
 	}
 	for _, c := range cases {
 		got := Check(mod, []Package{c.pkg})
@@ -72,6 +87,7 @@ func TestCheckRejectsViolations(t *testing.T) {
 		{m + "aa/store", []string{"github.com/jackc/pgx/v5"}},
 		{m + "aabb", []string{m + "aabb/store"}},
 		{mod + "/internal/httpapi", []string{m + "aa", m + "bb", "net/http"}},
+		{mod + "/internal/platform/db", []string{mod + "/internal/platformutil", "github.com/jackc/pgx/v5", "net/http"}},
 	}
 	if got := Check(mod, allowed); len(got) != 0 {
 		t.Errorf("allowed dependencies were rejected: %v", got)

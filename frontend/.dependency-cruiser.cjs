@@ -12,6 +12,14 @@ module.exports = {
       to: { circular: true },
     },
     {
+      name: "not-to-unresolvable",
+      comment:
+        "An import that does not resolve (a broken @/ alias or tsconfig path) slips past every path rule below.",
+      severity: "error",
+      from: {},
+      to: { couldNotResolve: true },
+    },
+    {
       name: "shared-not-to-features-or-app",
       comment:
         "lib, components, hooks, store, providers and i18n are shared by every feature and never depend on one.",

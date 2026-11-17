@@ -63,9 +63,12 @@ src/
 | `features/<name>/` | its own files, shared layers, other features through their `index.ts` or `server.ts`; never `app/` |
 | `lib/`, `components/`, `hooks/`, `store/`, `providers/`, `i18n/` (shared) | each other; never `features/` or `app/` |
 
-No import cycles anywhere. A derived project that adds a layer adds it to the table and to the matching rule in
+No import cycles anywhere, and no import that fails to resolve (a broken `@/` alias would otherwise slip past every
+path rule). A derived project that adds a layer adds it to the table and to the matching rule in
 `.dependency-cruiser.cjs` in the same commit. Fix a violation by moving code (into the feature, or down into a shared
-layer), not by adding an exception.
+layer), not by adding an exception. A rule whose pattern matches nothing passes silently, so
+`src/__tests__/dependency-rules.test.ts` feeds each rule a deliberate violation (through the `@/` alias) and checks that
+every directory a rule names exists; a new rule gets a case there.
 
 ## Key Conventions
 
